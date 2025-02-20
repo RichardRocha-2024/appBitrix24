@@ -5,8 +5,6 @@ from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 
-# URL do segundo sistema que recebe os dados como Query Params
-DESTINO_URL_ADD_CONTATOS = "https://ourolux.bitrix24.com.br/rest/15/1cp3l525ysrcdyhe/crm.lead.add.json"
 
 @app.route('/convertendoParaConcatos', methods=['POST'])
 def convert_and_forward():
@@ -18,8 +16,8 @@ def convert_and_forward():
         if not json_data:
             return jsonify({"erro": "Nenhum JSON recebido"}), 400
         
-        with open("MicroServicos/exemploRDNEW.json", "w", encoding="utf-8") as json_file:
-            json.dump(json_data, json_file, indent=4, ensure_ascii=False)
+        #with open("MicroServicos/exemploRDNEW.json", "w", encoding="utf-8") as json_file:
+        #    json.dump(json_data, json_file, indent=4, ensure_ascii=False)
 
         Campos = ['NAME','HAS_EMAIL','EMAIL][0][VALUE','ADDRESS_PROVINCE','PHONE][0][VALUE']
         Values = []
