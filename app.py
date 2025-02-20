@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 import requests
 import json
 from gevent.pywsgi import WSGIServer
+import os
 
 app = Flask(__name__)
 
+DESTINO_URL_ADD_CONTATOS = str(os.environ.get('DESTINO_URL_ADD_CONTATOS'))
 
 @app.route('/convertendoParaConcatos', methods=['POST'])
 def convert_and_forward():
