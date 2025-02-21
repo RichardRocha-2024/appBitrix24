@@ -7,7 +7,6 @@ import os
 app = Flask(__name__)
 
 DESTINO_URL_ADD_CONTATOS = str(os.environ.get('DESTINO_URL_ADD_CONTATOS'))
-DESTINO_URL_ADD_CONTATOS = "https://ourolux.bitrix24.com.br/rest/15/1cp3l525ysrcdyhe/crm.lead.add.json"
 
 @app.route('/convertendoParaConcatosIluminacao', methods=['POST'])
 def convert_and_forward():
@@ -78,6 +77,6 @@ def convert_and_forward():
         return jsonify({"erro": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(host='0.0.0.0', port=5000, debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
