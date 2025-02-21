@@ -7,8 +7,9 @@ import os
 app = Flask(__name__)
 
 DESTINO_URL_ADD_CONTATOS = str(os.environ.get('DESTINO_URL_ADD_CONTATOS'))
+DESTINO_URL_ADD_CONTATOS = "https://ourolux.bitrix24.com.br/rest/15/1cp3l525ysrcdyhe/crm.lead.add.json"
 
-@app.route('/convertendoParaConcatos', methods=['POST'])
+@app.route('/convertendoParaConcatosIluminacao', methods=['POST'])
 def convert_and_forward():
     
     try:
@@ -18,8 +19,8 @@ def convert_and_forward():
         if not json_data:
             return jsonify({"erro": "Nenhum JSON recebido"}), 400
         
-        #with open("MicroServicos/exemploRDNEW.json", "w", encoding="utf-8") as json_file:
-        #    json.dump(json_data, json_file, indent=4, ensure_ascii=False)
+        with open("MicroServicos/exemploRDNEW.json", "w", encoding="utf-8") as json_file:
+            json.dump(json_data, json_file, indent=4, ensure_ascii=False)
 
         Campos = ['NAME','HAS_EMAIL','EMAIL][0][VALUE','ADDRESS_PROVINCE','PHONE][0][VALUE']
         Values = []
@@ -53,10 +54,11 @@ def convert_and_forward():
 				{ 
                     "TITLE": "Lead - RD Station",
 					"NAME": f"{Values[0]}",
+					"ASSIGNED_BY_ID": 91,
                     "HAS_EMAIL": f"{Values[1]}",
-                    "EMAIL": [ { "VALUE": f"{Values[2]}", "VALUE_TYPE": "WORK" } ],
+                    "EMAIL": [ { "VALUE": f"{Values[2]}", "VALUE_TYPE": "OTHER" } ],
                     "ADDRESS_PROVINCE": f"{Values[3]}",
-                    "PHONE": [ { "VALUE": f"{Values[4]}", "VALUE_TYPE": "WORK" } ],	
+                    "PHONE": [ { "VALUE": f"{Values[4]}", "VALUE_TYPE": "OTHER" } ],	
 		    }
         }        
 
