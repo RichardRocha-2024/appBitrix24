@@ -8,7 +8,8 @@ app = Flask(__name__)
 
 DESTINO_URL_ADD_CONTATOS = str(os.environ.get('DESTINO_URL_ADD_CONTATOS'))
 
-@app.route('/convertendoParaConcatosIluminacao', methods=['POST'])
+
+@app.route('/convertendoParaContatosIluminacao', methods=['POST'])
 def convert_and_forward():
     
     try:
@@ -18,8 +19,8 @@ def convert_and_forward():
         if not json_data:
             return jsonify({"erro": "Nenhum JSON recebido"}), 400
         
-        with open("MicroServicos/exemploRDNEW.json", "w", encoding="utf-8") as json_file:
-            json.dump(json_data, json_file, indent=4, ensure_ascii=False)
+        #with open("MicroServicos/exemploRDNEW.json", "w", encoding="utf-8") as json_file:
+        #    json.dump(json_data, json_file, indent=4, ensure_ascii=False)
 
         Campos = ['NAME','HAS_EMAIL','EMAIL][0][VALUE','ADDRESS_PROVINCE','PHONE][0][VALUE']
         Values = []
