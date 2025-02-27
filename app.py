@@ -8,8 +8,6 @@ app = Flask(__name__)
 
 DESTINO_URL = str(os.environ.get('DESTINO_URL'))
 #Para testes
-DESTINO_URL = "https://ourolux.bitrix24.com.br/rest/15/1cp3l525ysrcdyhe/"
-
 
 DESTINO_URL_LIST_LEAD_ID = DESTINO_URL + "crm.lead.list.json?order[id]=desc&select[0]=id"   
 ID_LAST_LEAD_REQUEST = requests.post(DESTINO_URL_LIST_LEAD_ID).json()['result'][0]['ID']
@@ -66,7 +64,7 @@ def convert_and_forwardIlu():
                     "HAS_EMAIL": f"{Values[1]}",
                     "EMAIL": [ { "VALUE": f"{Values[2]}", "VALUE_TYPE": "OTHER" } ],
                     "ADDRESS_PROVINCE": f"{Values[3]}",
-                    "PHONE": [ { "VALUE": f"{Values[4]}", "VALUE_TYPE": "OTHER" } ],
+                    "PHONE": [ { "VALUE": f"55 {Values[4]}", "VALUE_TYPE": "OTHER" } ],
                     "COMMENTS": f"{Values[5]}",
                     "SOURCE_ID": "WEB", 
                     "SOURCE_DESCRIPTION": "Site RD Station",
@@ -111,6 +109,6 @@ def convert_and_forwardIlu():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-    #http_server = WSGIServer(('', 5000), app)
-    #http_server.serve_forever()
+    #app.run(host='0.0.0.0', port=5000, debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
