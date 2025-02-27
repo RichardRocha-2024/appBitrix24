@@ -14,14 +14,22 @@ ID_LAST_LEAD_REQUEST = requests.post(DESTINO_URL_LIST_LEAD_ID).json()['result'][
 ID_NEXT_LEAD = int(ID_LAST_LEAD_REQUEST) + 1
 
 
-@app.route('/convertendoParaContatosIluminacao', methods=['POST'])
+@app.route('/convertendoParaContatos', methods=['POST'])
 def convert_and_forwardIlu():
     global ID_NEXT_LEAD
-
     tituloDoLead = "Lead - RD Station - nº " + str(ID_NEXT_LEAD)
+
     try:
         # Obtendo o JSON enviado pelo primeiro sistema
         json_data = request.get_json()
+        bu = request.args.get('bu','')
+
+        if bu == 'iluminacao':
+            dep = 45
+        elif bu == 'solar':
+            dep = 47
+        else:
+            dep = ''
      
         if not json_data:
             return jsonify({"erro": "Nenhum JSON recebido"}), 400
@@ -84,12 +92,12 @@ def convert_and_forwardIlu():
             DESTINO_DEAL_ID = DESTINO_URL + "crm.deal.list.json?select[0]=id&filter[TITLE]=" + tituloDoLead 
             response = requests.get(DESTINO_DEAL_ID)
             ID_DEAL = str(response.json()['result'][0]['ID'])
-            if response.status_code == 200:
+            if response.status_code == 200 and dep != '':
                 DESTINO_DEAL_UPDATE = DESTINO_URL + "crm.deal.update.json"
                 body = {
                     "id": f"{ID_DEAL}",
                     "fields": {
-                        "UF_CRM_1734459916238": 45
+                        "UF_CRM_1734459916238": dep
                     }
                 }
                 response = requests.post(DESTINO_DEAL_UPDATE, json=body)
