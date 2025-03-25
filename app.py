@@ -41,7 +41,7 @@ class empresa:
 class Lead:
     def __init__(self, nome = None, cnpj = None, email = None, telefone = None, estado = None,
                  comentarios = None, utm_source = None, utm_medium = None, utm_campaign = None,
-                 company = None):
+                 company = None, segmento = None):
         self.nome = nome
         self.cnpj = cnpj
         self.company = company
@@ -53,6 +53,7 @@ class Lead:
         self.utm_source = utm_source
         self.utm_medium = utm_medium
         self.utm_campaign = utm_campaign
+        self.segmento = segmento
 
     def buscarCNPJJa(self):
         AUTH_CNPJJA = str(os.environ.get('AUTH_CNPJJA'))
@@ -86,6 +87,7 @@ class Lead:
         dadosCNPJ.ibge = cnpjJson.get("address", {}).get("municipality", "")
 
         #CNAE
+        dadosCNPJ.cnae = []
         main = cnpjJson.get("mainActivity",{})
         side = cnpjJson.get("sideActivities",[])
         dadosCNPJ.cnae.append(main)
@@ -93,21 +95,21 @@ class Lead:
             dadosCNPJ.cnae.append(cnaeAc)
 
         #Contatos
+        listaDeEmails = []
         listaDeEmails = cnpjJson.get("emails",[])
         for emailsJSON in listaDeEmails:
             dadosCNPJ.email.append(emailsJSON)
         
+        listaDeEmails = []
         listaDeTelefones = cnpjJson.get("phones",[])
         for telefoneJSON in listaDeTelefones:
-            dadosCNPJ.telefone.append(telefoneJSON)
-
+            dadosCNPJ.telefone.append('55'+str(telefoneJSON))
 
         #Registros
         registros = cnpjJson.get("registrations",[])
         for registro in registros:
             if registro.get("type", "") == "IE":
                 dadosCNPJ.ie = registro.get("number", "")
-
 
         return dadosCNPJ
 
@@ -121,13 +123,13 @@ DESTINO_URL_LIST_LEAD_ID = DESTINO_URL + "crm.lead.list.json?order[id]=desc&sele
 ID_LAST_LEAD_REQUEST = requests.post(DESTINO_URL_LIST_LEAD_ID).json()['result'][0]['ID']
 ID_NEXT_LEAD = int(ID_LAST_LEAD_REQUEST) + 1
 
+print("ID_NEXT_LEAD: " + str(ID_NEXT_LEAD))
 
 @app.route('/convertendoParaContatos', methods=['POST'])
 def convert_and_forwardIlu():
     global ID_NEXT_LEAD
     tituloDoLead = "Lead - RD Station - nº " + str(ID_NEXT_LEAD)
-    
-    ASSIMGNED_BY_ID = 91
+    ASSIMGNED_BY_ID = 431
 
     try:
         # Obtendo o JSON enviado pelo primeiro sistema
@@ -139,7 +141,8 @@ def convert_and_forwardIlu():
         elif bu == 'solar':
             dep = 47
         else:
-            dep = ''
+            #Cai padrão para iluminação
+            dep = 45
      
         if not json_data:
             return jsonify({"erro": "Nenhum JSON recebido"}), 400
@@ -273,8 +276,13 @@ def convert_and_forwardIlu():
             #ID do Contato
             ID_CONTATO = response.json()['result']
 
+
+            
+
             #Criar Empresa
             EmpresaRegistroNacional = LeadRDStaion.buscarCNPJJa()
+        
+
             bodyEmpresa = {
                 "fields":
                 {                     
@@ -291,8 +299,8 @@ def convert_and_forwardIlu():
                     "UTM_CAMPAIGN": f"{LeadRDStaion.utm_campaign}",
                     "REVENUE": f"{EmpresaRegistroNacional.capitalSocial}",
                     "CURRENCY_ID": "BRL",
-                    "UF_CRM_1737047541": f"{EmpresaRegistroNacional.endereco}, {EmpresaRegistroNacional.numero}"
-                    
+                    "UF_CRM_1737047541": f"{EmpresaRegistroNacional.endereco}, {EmpresaRegistroNacional.numero}",
+                    "UF_CRM_1737047653": f"{EmpresaRegistroNacional.cnae}",              
                 }
             }
 
@@ -306,6 +314,20 @@ def convert_and_forwardIlu():
         else:
             ID_CNPJ = ''
             ID_CONTATO = ''
+
+
+        # Criar o Lead
+        listaDeCnaes = [itemCNAE['id'] for itemCNAE in EmpresaRegistroNacional.cnae]
+        LeadRDStaion.segmento = 273
+
+        print(4744099 in listaDeCnaes)
+
+        if   4744099 in listaDeCnaes or 4744005 in listaDeCnaes:
+            LeadRDStaion.segmento = 49
+        elif 4742300 in listaDeCnaes or 4754703 in listaDeCnaes:
+            LeadRDStaion.segmento = 53
+        elif 4729699 in listaDeCnaes or 4712100 in listaDeCnaes:
+            LeadRDStaion.segmento = 51
 
         body = {
                 "fields":
@@ -324,7 +346,6 @@ def convert_and_forwardIlu():
                     "UTM_SOURCE": f"{LeadRDStaion.utm_source}",
                     "UTM_MEDIUM": f"{LeadRDStaion.utm_medium}",
                     "UTM_CAMPAIGN": f"{LeadRDStaion.utm_campaign}",
-                    
             }
         }
         
@@ -343,7 +364,8 @@ def convert_and_forwardIlu():
                 body = {
                     "id": f"{ID_DEAL}",
                     "fields": {
-                        "UF_CRM_1734459916238": dep
+                        "UF_CRM_1734459916238": dep,
+                        "UF_CRM_1734459945563": f"{LeadRDStaion.segmento}",
                     }
                 }
                 response = requests.post(DESTINO_DEAL_UPDATE, json=body)
