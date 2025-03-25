@@ -250,6 +250,40 @@ def convert_and_forwardIlu():
         elif LeadRDStaion.cnpj != "" and CNPJ_SEARCH['total'] !=1:
             print("CNPJ não localizado na base Bitrix")
             
+            #Criar Empresa
+            EmpresaRegistroNacional = LeadRDStaion.buscarCNPJJa()
+            listaDeCnaes = [itemCNAE['id'] for itemCNAE in EmpresaRegistroNacional.cnae]
+
+            bodyEmpresa = {
+                "fields":
+                {                     
+                    "TITLE": f"{EmpresaRegistroNacional.razaoSocial}",
+                    "COMPANY_TYPE" : "CUSTOMERS",
+                    "ASSIGNED_BY_ID": ASSIMGNED_BY_ID,
+                    "EMAIL": [ { "VALUE": f"{EmpresaRegistroNacional.email[0]['address']}", "VALUE_TYPE": "WORK" } ],
+                    "ADDRESS_PROVINCE": f"{EmpresaRegistroNacional.estado}",
+                    "PHONE": [ { "VALUE": f"{EmpresaRegistroNacional.telefone[0]}", "VALUE_TYPE": "OTHER" } ],
+                    "SOURCE_ID": "WEB", 
+                    "SOURCE_DESCRIPTION": "Site RD Station",
+                    "UTM_SOURCE": f"{LeadRDStaion.utm_source}",
+                    "UTM_MEDIUM": f"{LeadRDStaion.utm_medium}",
+                    "UTM_CAMPAIGN": f"{LeadRDStaion.utm_campaign}",
+                    "REVENUE": f"{EmpresaRegistroNacional.capitalSocial}",
+                    "CURRENCY_ID": "BRL",
+                    "UF_CRM_1737047541": f"{EmpresaRegistroNacional.endereco}, {EmpresaRegistroNacional.numero}",
+                    "UF_CRM_1737047653": f"{listaDeCnaes}",
+                    "UF_CRM_1737047624": f"{LeadRDStaion.cnpj}",              
+                }
+            }
+
+            DESTINO_URL_ADD_COMPANY = DESTINO_URL + "crm.company.add.json"
+            response = requests.post(DESTINO_URL_ADD_COMPANY, json = bodyEmpresa)
+
+
+            print(response.json()['result'])
+            ID_CNPJ = response.json()['result']
+            print(ID_CNPJ)
+            
             #Criar o contato
             bodyContato = {
                 "fields":
@@ -257,6 +291,7 @@ def convert_and_forwardIlu():
                     "SECOND_NAME": f"{LeadRDStaion.nome}",
                     "NAME": f"{LeadRDStaion.nome}",
                     "ASSIGNED_BY_ID": ASSIMGNED_BY_ID,
+                    "COMPANY_ID": f"{ID_CNPJ}",
                     "EMAIL": [ { "VALUE": f"{LeadRDStaion.email}", "VALUE_TYPE": "WORK" } ],
                     "ADDRESS_PROVINCE": f"{LeadRDStaion.estado}",
                     "PHONE": [ { "VALUE": f"{LeadRDStaion.telefone}", "VALUE_TYPE": "OTHER" } ],
@@ -279,39 +314,7 @@ def convert_and_forwardIlu():
 
             
 
-            #Criar Empresa
-            EmpresaRegistroNacional = LeadRDStaion.buscarCNPJJa()
-        
-
-            bodyEmpresa = {
-                "fields":
-                {                     
-                    "TITLE": f"{EmpresaRegistroNacional.razaoSocial}",
-                    "COMPANY_TYPE" : "CUSTOMERS",
-                    "ASSIGNED_BY_ID": ASSIMGNED_BY_ID,
-                    "EMAIL": [ { "VALUE": f"{EmpresaRegistroNacional.email[0]['address']}", "VALUE_TYPE": "WORK" } ],
-                    "ADDRESS_PROVINCE": f"{EmpresaRegistroNacional.estado}",
-                    "PHONE": [ { "VALUE": f"{EmpresaRegistroNacional.telefone[0]}", "VALUE_TYPE": "OTHER" } ],
-                    "SOURCE_ID": "WEB", 
-                    "SOURCE_DESCRIPTION": "Site RD Station",
-                    "UTM_SOURCE": f"{LeadRDStaion.utm_source}",
-                    "UTM_MEDIUM": f"{LeadRDStaion.utm_medium}",
-                    "UTM_CAMPAIGN": f"{LeadRDStaion.utm_campaign}",
-                    "REVENUE": f"{EmpresaRegistroNacional.capitalSocial}",
-                    "CURRENCY_ID": "BRL",
-                    "UF_CRM_1737047541": f"{EmpresaRegistroNacional.endereco}, {EmpresaRegistroNacional.numero}",
-                    "UF_CRM_1737047653": f"{EmpresaRegistroNacional.cnae}",
-                    "UF_CRM_1737047624": f"{LeadRDStaion.cnpj}",              
-                }
-            }
-
-            DESTINO_URL_ADD_COMPANY = DESTINO_URL + "crm.company.add.json"
-            response = requests.post(DESTINO_URL_ADD_COMPANY, json = bodyEmpresa)
-
-
-            print(response.json()['result'])
-            ID_CNPJ = response.json()['result']
-            print(ID_CNPJ)
+            
         else:
             ID_CNPJ = ''
             ID_CONTATO = ''
