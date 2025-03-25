@@ -197,6 +197,7 @@ def convert_and_forwardIlu():
         elif CNPJ_SEARCH['result'] != []:
             print("CNPJ localizado")
             print(CNPJ_SEARCH['result'])
+            EmpresaRegistroNacional = LeadRDStaion.buscarCNPJJa()
             #Pegar Data de Atualização do CNPJ
             CNPJ_SEARCH_DATA_UPDATE = str(CNPJ_SEARCH['result'][0]['DATE_MODIFY'])[0:10]
             hoje = datetime.datetime.now()
