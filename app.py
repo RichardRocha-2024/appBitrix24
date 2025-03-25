@@ -238,14 +238,17 @@ def convert_and_forwardIlu():
                 }
             }
 
-            print(bodyContato)
+
             print("\n")
 
             DESTINO_URL_ADD_CONTACT = DESTINO_URL + "crm.contact.add.json"
+            print(DESTINO_URL_ADD_CONTACT)
             response = requests.post(DESTINO_URL_ADD_CONTACT, json=bodyContato)
+            print("Fim da requisição")
 
             #ID do Contato
             ID_CONTATO = response.json()['result']
+            print(ID_CONTATO)
 
         elif LeadRDStaion.cnpj != "" and CNPJ_SEARCH['total'] !=1:
             print("CNPJ não localizado na base Bitrix")
@@ -310,11 +313,6 @@ def convert_and_forwardIlu():
 
             #ID do Contato
             ID_CONTATO = response.json()['result']
-
-
-            
-
-            
         else:
             ID_CNPJ = ''
             ID_CONTATO = ''
