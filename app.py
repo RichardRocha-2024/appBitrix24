@@ -184,7 +184,7 @@ def convert_and_forwardIlu():
         print(LeadRDStaion.cnpj)
 
 
-        ASSIMGNED_BY_ID = 91
+        ASSIMGNED_BY_ID = 431
 
         # Trabalhando CNPJ Localizado
         if LeadRDStaion.cnpj == "":
