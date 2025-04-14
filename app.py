@@ -103,7 +103,7 @@ class Lead:
         listaDeEmails = []
         listaDeTelefones = cnpjJson.get("phones",[])
         for telefoneJSON in listaDeTelefones:
-            dadosCNPJ.telefone.append('55'+str(telefoneJSON).replace("-",""))
+            dadosCNPJ.telefone.append(+str(telefoneJSON).replace("-",""))
 
         #Registros
         registros = cnpjJson.get("registrations",[])
@@ -166,7 +166,7 @@ def convert_and_forwardIlu():
         # Telefone: Prioriza 'personal_phone', senão 'mobile_phone', senão vazio
         phone = lead.get('personal_phone') or lead.get('mobile_phone', '')
         if phone != '' and phone != None:
-            phone = "55" + str(phone).replace("-","")
+            phone =  str(phone).replace("-","")
         LeadRDStaion.telefone = str(phone).replace("-","")
 
         # Comentários: Adicionar 'company'
