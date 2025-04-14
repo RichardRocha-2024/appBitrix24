@@ -58,6 +58,7 @@ class Lead:
     def buscarCNPJJa(self):
         AUTH_CNPJJA = str(os.environ.get('AUTH_CNPJJA'))
         
+        
         response = requests.get('https://api.cnpja.com/office/' + self.cnpj + '?registrations=BR', 
                     headers={"Authorization": AUTH_CNPJJA})
         cnpjJson = response.json()
@@ -65,7 +66,7 @@ class Lead:
         #print("CNPJJA: " + str(cnpjJson))
         #print(cnpjJson)
         dadosCNPJ = empresa()
-        
+                
         #Dados da Empresa
         dadosCNPJ.cnpj = self.cnpj
         dadosCNPJ.razaoSocial = cnpjJson.get("company", {}).get("name", "")
@@ -100,10 +101,14 @@ class Lead:
         for emailsJSON in listaDeEmails:
             dadosCNPJ.email.append(emailsJSON)
         
+        print('testeC')
+
         listaDeEmails = []
         listaDeTelefones = cnpjJson.get("phones",[])
         for telefoneJSON in listaDeTelefones:
-            dadosCNPJ.telefone.append(+str(telefoneJSON).replace("-",""))
+            dadosCNPJ.telefone.append(str(telefoneJSON).replace("-",""))
+
+        print('testeC2')
 
         #Registros
         registros = cnpjJson.get("registrations",[])
@@ -185,7 +190,8 @@ def convert_and_forwardIlu():
 
 
         ASSIMGNED_BY_ID = 431
-
+        
+        
         # Trabalhando CNPJ Localizado
         if LeadRDStaion.cnpj == "":
             # Se não encontrar CNPJ, busca na API CNPJ JA
@@ -253,11 +259,12 @@ def convert_and_forwardIlu():
 
         elif LeadRDStaion.cnpj != "" and CNPJ_SEARCH['total'] !=1:
             print("CNPJ não localizado na base Bitrix")
-            
+
             #Criar Empresa
             EmpresaRegistroNacional = LeadRDStaion.buscarCNPJJa()
-            listaDeCnaes = [itemCNAE['id'] for itemCNAE in EmpresaRegistroNacional.cnae]
+            print('teste0')
 
+            listaDeCnaes = [itemCNAE['id'] for itemCNAE in EmpresaRegistroNacional.cnae]
             bodyEmpresa = {
                 "fields":
                 {                     
@@ -279,6 +286,7 @@ def convert_and_forwardIlu():
                     "UF_CRM_1737047624": f"{LeadRDStaion.cnpj}",              
                 }
             }
+
 
             DESTINO_URL_ADD_COMPANY = DESTINO_URL + "crm.company.add.json"
             response = requests.post(DESTINO_URL_ADD_COMPANY, json = bodyEmpresa)
@@ -318,7 +326,7 @@ def convert_and_forwardIlu():
             ID_CNPJ = ''
             ID_CONTATO = ''
 
-
+        
         # Criar o Lead
         listaDeCnaes = [itemCNAE['id'] for itemCNAE in EmpresaRegistroNacional.cnae]
         LeadRDStaion.segmento = 273
@@ -342,7 +350,7 @@ def convert_and_forwardIlu():
                     "CONTACT_ID": f"{ID_CONTATO}",
                     "EMAIL": [ { "VALUE": f"{LeadRDStaion.email}", "VALUE_TYPE": "WORK" } ],
                     "ADDRESS_PROVINCE": f"{LeadRDStaion.estado}",
-                    "PHONE": [ { "VALUE": f"{LeadRDStaion.telefone}", "VALUE_TYPE": "OTHER" } ],
+                    "PHONE": [ { "VALUE": f"{LeadRDStaion.telefone[2:]}", "VALUE_TYPE": "OTHER" } ],
                     "COMMENTS": f"{LeadRDStaion.company}",
                     "SOURCE_ID": "WEB", 
                     "SOURCE_DESCRIPTION": "Site RD Station",
