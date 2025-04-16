@@ -126,7 +126,7 @@ DESTINO_URL = str(os.environ.get('DESTINO_URL'))
 
 DESTINO_URL_LIST_LEAD_ID = DESTINO_URL + "crm.lead.list.json?order[id]=desc&select[0]=id"   
 ID_LAST_LEAD_REQUEST = requests.post(DESTINO_URL_LIST_LEAD_ID).json()['result'][0]['ID']
-ID_NEXT_LEAD = int(ID_LAST_LEAD_REQUEST) + 1
+ID_NEXT_LEAD = int(ID_LAST_LEAD_REQUEST) + 2
 
 print("ID_NEXT_LEAD: " + str(ID_NEXT_LEAD))
 
