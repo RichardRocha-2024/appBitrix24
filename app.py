@@ -106,7 +106,8 @@ class Lead:
         listaDeEmails = []
         listaDeTelefones = cnpjJson.get("phones",[])
         for telefoneJSON in listaDeTelefones:
-            dadosCNPJ.telefone.append(str(telefoneJSON).replace("-",""))
+            telefone = str(telefoneJSON.get("area", "")) + str(telefoneJSON.get("number", ""))
+            dadosCNPJ.telefone.append(str(telefone).replace("-",""))
 
         print('testeC2')
 
@@ -132,6 +133,7 @@ print("ID_NEXT_LEAD: " + str(ID_NEXT_LEAD))
 
 @app.route('/convertendoParaContatos', methods=['POST'])
 def convert_and_forwardIlu():
+
     global ID_NEXT_LEAD
     tituloDoLead = "Lead - RD Station - nº " + str(ID_NEXT_LEAD)
     ASSIMGNED_BY_ID = 431
@@ -380,7 +382,7 @@ def convert_and_forwardIlu():
                     }
                 }
                 response = requests.post(DESTINO_DEAL_UPDATE, json=body)
-                print("DEAL" + str(response.json()))
+                print("Update DEAL" + str(response.json()))
         
 
         print("NEXT: " + str(ID_NEXT_LEAD))
