@@ -100,16 +100,12 @@ class Lead:
         listaDeEmails = cnpjJson.get("emails",[])
         for emailsJSON in listaDeEmails:
             dadosCNPJ.email.append(emailsJSON)
-        
-        print('testeC')
-
+ 
         listaDeEmails = []
         listaDeTelefones = cnpjJson.get("phones",[])
         for telefoneJSON in listaDeTelefones:
             telefone = str(telefoneJSON.get("area", "")) + str(telefoneJSON.get("number", ""))
             dadosCNPJ.telefone.append(str(telefone).replace("-",""))
-
-        print('testeC2')
 
         #Registros
         registros = cnpjJson.get("registrations",[])
@@ -136,7 +132,7 @@ def convert_and_forwardIlu():
 
     global ID_NEXT_LEAD
     tituloDoLead = "Lead - RD Station - nº " + str(ID_NEXT_LEAD)
-    ASSIMGNED_BY_ID = 431
+    ASSIMGNED_BY_ID = 103
 
     try:
         # Obtendo o JSON enviado pelo primeiro sistema
@@ -148,15 +144,13 @@ def convert_and_forwardIlu():
         elif bu == 'solar':
             dep = 47
         else:
-            #Cai padrão para iluminação
             dep = 45
      
         if not json_data:
             return jsonify({"erro": "Nenhum JSON recebido"}), 400
         
         #Campos = ['NAME','HAS_EMAIL','EMAIL','ADDRESS_PROVINCE','PHONE','COMMENTS','UTM_SOURCE','UTM_MEDIUM','UTM_CAMPAIGN']
-        LeadRDStaion = Lead()
-        
+        LeadRDStaion = Lead()        
         
         # Garante que há um dicionário para evitar KeyError
         lead = json_data.get('leads', [{}])[0]  
@@ -167,7 +161,6 @@ def convert_and_forwardIlu():
         email = lead.get('email', '')
         LeadRDStaion.hasEmail = ('Y' if email else 'N')
         LeadRDStaion.email = email
-
         LeadRDStaion.estado = (lead.get('state', ''))
 
         # Telefone: Prioriza 'personal_phone', senão 'mobile_phone', senão vazio
@@ -190,9 +183,7 @@ def convert_and_forwardIlu():
         CNPJ_SEARCH = requests.get(DESTINO_URL + 'crm.company.list.json?filter[UF_CRM_1737047624]=' + f'{LeadRDStaion.cnpj}').json()        
         print(LeadRDStaion.cnpj)
 
-
         ASSIMGNED_BY_ID = 431
-        
         
         # Trabalhando CNPJ Localizado
         if LeadRDStaion.cnpj == "":
@@ -218,13 +209,21 @@ def convert_and_forwardIlu():
             try:
                 ASSIMGNED_BY_ID = int(CNPJ_SEARCH['result'][0]['ASSIGNED_BY_ID'])
             except:
-                ASSIMGNED_BY_ID = 91
+                ASSIMGNED_BY_ID = 103
 
             #Se a data de atualização for 6 meses a menos que hoje, atualiza
             diferencaDeDatas = datetime.datetime.strptime(hoje, "%Y-%m-%d") - datetime.datetime.strptime(CNPJ_SEARCH_DATA_UPDATE, "%Y-%m-%d")
             
             if diferencaDeDatas.days > 180:
                 print("Atualizar CNPJ")
+
+            telefoneParaContato = ''
+            #Ajustar Telefone para ligação
+            if LeadRDStaion.telefone[0:2] == "11":
+                telefoneParaContato = "0" + str(LeadRDStaion.telefone[2:])
+            else:
+                telefoneParaContato = "00" + str(LeadRDStaion.telefone)
+            
             
             #Criar o contato
             bodyContato = {
@@ -235,7 +234,8 @@ def convert_and_forwardIlu():
                     "ASSIGNED_BY_ID": ASSIMGNED_BY_ID,
                     "EMAIL": [ { "VALUE": f"{LeadRDStaion.email}", "VALUE_TYPE": "WORK" } ],
                     "ADDRESS_PROVINCE": f"{LeadRDStaion.estado}",
-                    "PHONE": [ { "VALUE": f"{LeadRDStaion.telefone}", "VALUE_TYPE": "OTHER" } ],
+                    "PHONE": [ { "VALUE": f"{LeadRDStaion.telefone}", "VALUE_TYPE": "OTHER" },
+                               { "VALUE": f"{telefoneParaContato}", "VALUE_TYPE": "WORK" }],
                     "COMPANY_ID": f"{ID_CNPJ}",
                     "COMMENTS": f"{LeadRDStaion.company}",
                     "SOURCE_ID": "WEB", 
@@ -243,7 +243,6 @@ def convert_and_forwardIlu():
                     "UTM_SOURCE": f"{LeadRDStaion.utm_source}",
                     "UTM_MEDIUM": f"{LeadRDStaion.utm_medium}",
                     "UTM_CAMPAIGN": f"{LeadRDStaion.utm_campaign}",
-                    
                 }
             }
 
@@ -271,6 +270,7 @@ def convert_and_forwardIlu():
                 "fields":
                 {                     
                     "TITLE": f"{EmpresaRegistroNacional.razaoSocial}",
+                    "INDUSTRY":"OTHER",
                     "COMPANY_TYPE" : "CUSTOMERS",
                     "ASSIGNED_BY_ID": ASSIMGNED_BY_ID,
                     "EMAIL": [ { "VALUE": f"{EmpresaRegistroNacional.email[0]['address']}", "VALUE_TYPE": "WORK" } ],
@@ -365,7 +365,7 @@ def convert_and_forwardIlu():
         # Requisição para adicionar ao Bitrix24
         DESTINO_URL_ADD_LEAD = DESTINO_URL + "crm.lead.add.json"
         response = requests.post(DESTINO_URL_ADD_LEAD, json=body)
-        
+
         # Retornando a resposta do segundo sistema
         if response.status_code == 200:
             ID_NEXT_LEAD += 1
