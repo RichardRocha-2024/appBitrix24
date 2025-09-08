@@ -132,7 +132,7 @@ def convert_and_forwardIlu():
 
     global ID_NEXT_LEAD
     tituloDoLead = "Lead - RD Station - nº " + str(ID_NEXT_LEAD)
-    ASSIMGNED_BY_ID = 103
+    ASSIMGNED_BY_ID = 7059
 
     try:
         # Obtendo o JSON enviado pelo primeiro sistema
@@ -209,7 +209,7 @@ def convert_and_forwardIlu():
             try:
                 ASSIMGNED_BY_ID = int(CNPJ_SEARCH['result'][0]['ASSIGNED_BY_ID'])
             except:
-                ASSIMGNED_BY_ID = 103
+                ASSIMGNED_BY_ID = 7059
 
             #Se a data de atualização for 6 meses a menos que hoje, atualiza
             diferencaDeDatas = datetime.datetime.strptime(hoje, "%Y-%m-%d") - datetime.datetime.strptime(CNPJ_SEARCH_DATA_UPDATE, "%Y-%m-%d")
