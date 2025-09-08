@@ -183,7 +183,7 @@ def convert_and_forwardIlu():
         CNPJ_SEARCH = requests.get(DESTINO_URL + 'crm.company.list.json?filter[UF_CRM_1737047624]=' + f'{LeadRDStaion.cnpj}').json()        
         print(LeadRDStaion.cnpj)
 
-        ASSIMGNED_BY_ID = 431
+        ASSIMGNED_BY_ID = 103
         
         # Trabalhando CNPJ Localizado
         if LeadRDStaion.cnpj == "":
