@@ -37,7 +37,6 @@ class empresa:
         self.matriz = matriz
 
 
-
 class Lead:
     def __init__(self, nome = None, cnpj = None, email = None, telefone = None, estado = None,
                  comentarios = None, utm_source = None, utm_medium = None, utm_campaign = None,
@@ -115,7 +114,7 @@ class Lead:
 
         return dadosCNPJ
 
-
+json_antigo = ''
 
 app = Flask(__name__)
 DESTINO_URL = str(os.environ.get('DESTINO_URL'))
@@ -138,6 +137,11 @@ def convert_and_forwardIlu():
         # Obtendo o JSON enviado pelo primeiro sistema
         json_data = request.get_json()
         bu = request.args.get('bu','')
+
+        if json_data == json_antigo:
+            return jsonify({"status": "JSON duplicado ignorado"}), 200
+        else:
+            json_antigo = json_data
 
         if bu == 'iluminacao':
             dep = 45
